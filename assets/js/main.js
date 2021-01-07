@@ -190,4 +190,132 @@
     aos_init();
   });
 
+
+
+
+
+  // $('#btnsubmit').click(function(){
+  //   console.log('nona');
+  //   let id = $(this).attr('data-id');
+
+  //               Swal.fire({
+  //         title: "Are you sure?",
+  //         text: "Send this email!",
+  //         type: "confirm",
+  //         showCancelButton: true,
+  //         confirmButtonColor: "#DD6B55",
+  //         confirmButtonText: "Yes",
+  //         cancelButtonText: "No, cancel!",
+  //         closeOnConfirm: true,
+  //         closeOnCancel: false 
+  //     },
+  //     function(isConfirm) {
+  //         if (isConfirm) {
+  //             swal("Deleted!", "Your imaginary file has been deleted.", "success");
+  //             Swal.fire({
+  //               title: 'Success!',
+  //               text: 'Do you want to continue',
+  //               icon: 'success',
+  //               confirmButtonText: 'Cool'
+  //             });
+  //         } else {
+  //             swal("Cancelled", "Your imaginary file is safe :)", "error");
+  //         }
+  //     }
+  // );
+  //   });
+    function validateEmail(email) {
+      const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return re.test(String(email).toLowerCase());
+    }
+
+    function validateForm() {
+      var email = document.forms["emailPost"]["fromEmail"].value;
+      if (email == "") {
+        alert("Email must be filled out");
+        return false;
+      }
+      if (document.forms["emailPost"]["name"].value == "") {
+        alert("Name must be filled out");
+        return false;
+      }
+      if (document.forms["emailPost"]["subject"].value == "") {
+        alert("subject must be filled out");
+        return false;
+      }
+      if (document.forms["emailPost"]["message"].value == "") {
+        alert("message must be filled out");
+        return false;
+      }
+      if(!validateEmail(email)){
+        alert("email structure is not correct.");
+        return false;
+      };
+      return true
+    }
+
+    $("#btnsubmit").click(function(e) {
+      e.preventDefault();
+      if(validateForm()){
+        var fromEmail = $('#fromEmail').val();
+        var name = $('#name').val();
+        var subject = $('#subject').val();
+        var message = $('#message').val();
+  
+        var data = {
+          fromEmail: fromEmail,
+          name: name,
+          subject: subject,
+          message: message,
+        }
+        Swal.fire({
+            title: "Send the email?",
+            text: "",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Yes!"
+        }).then(function(result) {
+            if (result.value) {
+                // var data = new FormData($("#emailPost")[0]);
+                // var data = $('emailPost').serialize();
+                var myform = document.getElementById("emailPost");
+                var fd = new FormData(myform );
+                $.ajax({ //line 28
+                    type: 'POST',
+                    url: 'https://afaf-tech-staycation.herokuapp.com/api/v1/email-sender',
+                    // dataType: 'json',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(data),
+                    // data: data,
+                    processData: false,
+                    success: function(data, textStatus, xhr) {
+                        document.getElementById("emailPost").reset();
+                        console.log(xhr.status);
+                        if (xhr.status == 201) {
+                            Swal.fire(
+                                "Success!",
+                                `${data.message}`,
+                                "success"
+                            ).then(function(){
+                                window.location.reload();
+  
+                            });
+                        } 
+                    },
+                    fail: function(xhr, textStatus, errorThrown){
+                      Swal.fire(
+                        "Gagal!",
+                        `${textStatus}`,
+                        "error"
+                    )
+                   }
+                });
+  
+            }
+        });
+
+      }
+
+    });
+
 })(jQuery);
